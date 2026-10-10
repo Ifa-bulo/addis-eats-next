@@ -1,6 +1,7 @@
 # Addis Eats 🍽️
 
-**A modern food ordering web application built with Next.js and React.**
+**
+ food ordering web application built with Next.js and React.**
 
 Addis Eats is a responsive food ordering application inspired by
 Ethiopian cuisine. It combines an interactive menu, cart management,
