@@ -1,0 +1,30 @@
+{
+  "overrides": {
+    "next": {
+      "postcss": "^8.5.29"
+    }
+  },
+  "name": "addis-eats-next",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "validate": "node scripts/validate-project.mjs"
+  },
+  "dependencies": {
+    "next": "^16.4.0",
+    "react": "19.1.9",
+    "react-dom": "19.1.9",
+    "swr": "2.3.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.3.3"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  }
+}

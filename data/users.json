@@ -1,0 +1,5 @@
+[
+  {"id":"user-1","name":"Demo Customer","email":"ifa@example.com","passwordHash":"scrypt$8acc8338fcf0bd7caf337a20d207a07c$6438e6844c48213f82fccb1667f63fe322036014a49ee42eaa617243d6317f08b06a6813906ad18fd2cd4251f8b5acdc28bf6b089361bbab5d6c5dda1766e401","role":"customer"},
+  {"id":"user-2","name":"Sara Alemu","email":"sara@example.com","passwordHash":"scrypt$7dbc6c0e6c8820561af177653e5a85d0$5f47790a9f471f29f9afab4a9ec1dca90268e5a9a1f98e5d714358d7f23d2a3fd0d8511c76fee297d1ea3c4abbb414a33d29355e399a6a7fc5865d0e90c6610b","role":"customer"},
+  {"id":"staff-1","name":"Kitchen Team","email":"kitchen@example.com","passwordHash":"scrypt$9f3d003356fadea2ba90ae0c43d1a053$1f35037464cef412de9e5e49c3985f6fa4e253813b38e731a70c2fb4dd27628a3d5b248506b407a63038dfa47c4a24788a7e82eb681b2fdb1344db4b901b2116","role":"staff"}
+]

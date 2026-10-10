@@ -1,0 +1,33 @@
+export const metadata = {
+  title: 'About',
+  description: 'About Addis Eats and the experience behind the app.',
+};
+
+export default function AboutPage() {
+  return (
+    <section className="section container page-top narrow">
+      <span className="eyebrow dark">ABOUT ADDIS EATS</span>
+      <h1>Great food should feel simple.</h1>
+      <p>
+        We built Addis Eats as a modern ordering experience inspired by the
+        warmth and energy of Addis Ababa. The app keeps public menu content fast
+        and indexable while private order data stays protected behind session
+        checks.
+      </p>
+      <div className="story-grid">
+        <div>
+          <strong>Fresh first</strong>
+          <span>Real ingredients, clear descriptions, honest prices.</span>
+        </div>
+        <div>
+          <strong>Secure by structure</strong>
+          <span>Private routes, scoped queries and action-level checks.</span>
+        </div>
+        <div>
+          <strong>Live when it matters</strong>
+          <span>Order status updates without refreshing the page.</span>
+        </div>
+      </div>
+    </section>
+  );
+}

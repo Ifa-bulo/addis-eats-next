@@ -1,0 +1,42 @@
+[
+  {
+    "id": "ord_demo_001",
+    "userId": "user-1",
+    "customerName": "Demo Customer",
+    "phone": "0900000001",
+    "area": "Bole",
+    "status": "preparing",
+    "createdAt": "2026-10-05T17:30:00.000Z",
+    "items": [
+      {
+        "dishId": "doro-wat",
+        "name": "Doro wat",
+        "price": 420,
+        "quantity": 1
+      },
+      {
+        "dishId": "fresh-juice",
+        "name": "Fresh juice",
+        "price": 110,
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "ord_demo_002",
+    "userId": "user-2",
+    "customerName": "Sample Customer",
+    "phone": "0900000002",
+    "area": "Kazanchis",
+    "status": "delivered",
+    "createdAt": "2026-10-05T13:15:00.000Z",
+    "items": [
+      {
+        "dishId": "special-burger",
+        "name": "Special Burger",
+        "price": 350,
+        "quantity": 2
+      }
+    ]
+  }
+]
