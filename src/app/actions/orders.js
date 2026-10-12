@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createOrder, getDish, getOrderForUser, getAllOrders, updateOrderStatus as updateStoreStatus } from '@/lib/data';
 import { requireStaff, requireUser } from '@/lib/session';
+import { DELIVERY_AREAS, DELIVERY_OPTIONS } from '@/lib/delivery';
 
 function cleanItems(rawItems) {
   let items;
@@ -24,16 +25,19 @@ export async function placeOrder(_prevState, formData) {
   const customerName = String(formData.get('customerName') || '').trim();
   const phone = String(formData.get('phone') || '').trim();
   const area = String(formData.get('area') || '').trim();
+  const deliveryOption = String(formData.get('deliveryOption') || '');
+  const option = Object.hasOwn(DELIVERY_OPTIONS, deliveryOption) ? DELIVERY_OPTIONS[deliveryOption] : null;
   const items = cleanItems(String(formData.get('items') || ''));
   const fieldErrors = {};
 
   if (customerName.length < 2) fieldErrors.customerName = 'Please enter your name.';
   if (!/^09\d{8}$/.test(phone)) fieldErrors.phone = 'Use a valid Ethiopian mobile number, e.g. 0912345678.';
-  if (area.length < 2) fieldErrors.area = 'Please enter a delivery area.';
+  if (!DELIVERY_AREAS.includes(area)) fieldErrors.area = 'Choose a delivery area from the available list.';
+  if (!option) fieldErrors.deliveryOption = 'Choose a delivery method.';
   if (!items.length) return { error: 'Your cart is empty.', fieldErrors };
   if (Object.keys(fieldErrors).length) return { error: '', fieldErrors };
 
-  const order = createOrder({ userId: session.id, customerName, phone, area, items });
+  const order = createOrder({ userId: session.id, customerName, phone, area, items, deliveryOption, deliveryFee: option.fee });
   revalidatePath('/orders');
   revalidatePath('/kitchen');
   return { success: true, orderId: order.id };
@@ -56,9 +60,8 @@ export async function setOrderStatus(_prevState, formData) {
   const status = String(formData.get('status') || '');
   const allowed = ['received','preparing','out-for-delivery','delivered'];
   if (!allowed.includes(status)) return { error: 'Invalid status.' };
-  const order = getAllOrders().find((entry) => entry.id === orderId);
-  if (!order) return { error: 'Order not found.' };
-  if (order.status === 'cancelled') return { error: 'Cancelled orders cannot be updated.' };
+  const exists = getAllOrders().some((order) => order.id === orderId);
+  if (!exists) return { error: 'Order not found.' };
   updateStoreStatus(orderId, status);
   revalidatePath('/kitchen');
   revalidatePath(`/orders/${orderId}`);

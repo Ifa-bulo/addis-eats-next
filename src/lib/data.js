@@ -93,13 +93,15 @@ export function getAllOrders() {
   );
 }
 
-export function createOrder({ userId, customerName, phone, area, items }) {
+export function createOrder({ userId, customerName, phone, area, items, deliveryOption = 'standard', deliveryFee = 60 }) {
   const order = {
     id: `ord_${crypto.randomUUID().slice(0, 8)}`,
     userId,
     customerName,
     phone,
     area,
+    deliveryOption,
+    deliveryFee,
     status: 'received',
     createdAt: new Date().toISOString(),
     items

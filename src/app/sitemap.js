@@ -1,8 +1,9 @@
 import { getDishes } from '@/lib/data';
 import { blogPosts } from '@/lib/blog-data';
+import { SITE_URL } from '@/lib/site-url';
 
 export default function sitemap() {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const base = SITE_URL;
   const publicRoutes = ['', '/menu', '/about', '/blog', '/contact'].map((route) => ({
     url: `${base}${route}`,
     lastModified: new Date()

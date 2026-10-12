@@ -2,11 +2,10 @@ import './globals.css';
 import { CartProvider } from '@/components/cart-provider';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://addis-eats-next-omega.vercel.app';
+import { SITE_URL } from '@/lib/site-url';
 
 export const metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: 'Addis Eats | Ethiopian food delivery',
     template: '%s | Addis Eats'
@@ -15,9 +14,9 @@ export const metadata = {
   openGraph: {
     title: 'Addis Eats | Ethiopian food delivery',
     description: 'Ethiopian favorites and everyday comfort food, delivered with care across Addis Ababa.',
-    url: siteUrl,
+    url: SITE_URL,
     siteName: 'Addis Eats',
-    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Addis Eats food delivery in Addis Ababa' }],
+    images: [{ url: `${SITE_URL}/og-image.jpg`, width: 1200, height: 630, alt: 'Addis Eats food delivery in Addis Ababa' }],
     locale: 'en_US',
     type: 'website'
   },
@@ -25,7 +24,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Addis Eats | Ethiopian food delivery',
     description: 'Modern food delivery in Addis Ababa.',
-    images: ['/og-image.jpg']
+    images: [`${SITE_URL}/og-image.jpg`]
   }
 };
 
