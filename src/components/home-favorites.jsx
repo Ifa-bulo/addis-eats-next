@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { etb } from '@/lib/format';
 import { useEffect, useState } from 'react';
 import { useCart } from './cart-provider';
 
@@ -43,8 +44,8 @@ export default function HomeFavorites({ dishes }) {
       ) : favorites.map((dish) => (
         <div className="qe-reorder-row" key={dish.id}>
           <Image src={dish.image} alt={dish.name} width={92} height={82} />
-          <div><strong>{dish.name}</strong><span>ETB {dish.price}</span></div>
-          <button className="qe-mini-button" onClick={() => addItem(dish)} type="button">Reorder</button>
+          <div><strong>{dish.name}</strong><span>{etb(dish.price)}</span></div>
+          <button className="qe-mini-button" onClick={() => addItem(dish)} type="button" disabled={!dish.isAvailable}>{dish.isAvailable ? 'Reorder' : 'Unavailable'}</button>
         </div>
       ))}
     </section>

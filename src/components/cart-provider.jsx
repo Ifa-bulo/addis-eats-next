@@ -37,6 +37,7 @@ export function CartProvider({ children }) {
   }, [addedNotice]);
 
   function addItem(dish) {
+    if (!dish || dish.isAvailable === false) return;
     setAddedNotice({ id: `${dish.id}-${Date.now()}`, name: dish.name });
     setItems((current) => {
       const found = current.find((item) => item.id === dish.id);

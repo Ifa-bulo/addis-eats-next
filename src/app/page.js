@@ -15,6 +15,12 @@ export const metadata = {
     description: 'Ethiopian favorites and everyday comfort food, delivered with care across Addis Ababa.',
     url: SITE_URL,
     images: [{ url: `${SITE_URL}/og-image.jpg`, width: 1200, height: 630, alt: 'Addis Eats food delivery in Addis Ababa' }]
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Addis Eats | Your Next Meal Is Almost Here',
+    description: 'Ethiopian favorites and everyday comfort food, delivered with care across Addis Ababa.',
+    images: [`${SITE_URL}/og-image.jpg`]
   }
 };
 
@@ -29,7 +35,7 @@ const categories = [
 
 export default function HomePage() {
   const dishes = getDishes();
-  const popularDishes = dishes.filter((dish) => dish.popular).slice(0, 8);
+  const popularDishes = dishes.filter((dish) => dish.popular && dish.isAvailable).slice(0, 8);
 
   const jsonLd = {
     '@context': 'https://schema.org',

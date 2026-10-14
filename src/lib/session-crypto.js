@@ -1,12 +1,10 @@
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
-const DEVELOPMENT_SECRET = 'addis-eats-local-demo-secret-change-me';
 
 function getSecret() {
   const configured = process.env.SESSION_SECRET;
-  if (process.env.NODE_ENV === 'production' && (!configured || configured.length < 32)) return null;
-  return configured || DEVELOPMENT_SECRET;
+  return configured && configured.length >= 32 ? configured : null;
 }
 
 function toBase64Url(bytes) {
@@ -23,7 +21,7 @@ function fromBase64Url(value) {
 
 async function sign(value) {
   const secret = getSecret();
-  if (!secret) throw new Error('SESSION_SECRET must be configured in production before signing in.');
+  if (!secret) throw new Error('SESSION_SECRET must be configured with at least 32 characters before signing in.');
   const key = await crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
   const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(value));
   return toBase64Url(new Uint8Array(signature));

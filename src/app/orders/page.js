@@ -1,14 +1,63 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { getOrdersFor } from '@/lib/data';
 import { getSession } from '@/lib/session';
 import LogoutButton from '@/components/logout-button';
+import OrderTable from './OrderTable';
+import OrdersLoading from './loading';
+import ExportOrdersButton from '@/components/ExportOrdersButton';
 
-export const metadata = { title: 'My Orders', description: 'Private order history for the signed-in customer.', robots: { index: false, follow: false } };
+const DEMO_AREAS = ['Bole', 'Kazanchis', 'Piassa', 'Lideta', 'Mexico', 'Saris', 'CMC', 'Gerji', 'Megenagna'];
+const DEMO_STATUSES = ['received', 'preparing', 'out-for-delivery', 'delivered'];
 
-export default async function OrdersPage() {
+function createPaginationDemoOrders(userId) {
+  const now = Date.now();
+  return Array.from({ length: 27 }, (_, index) => ({
+    id: `ord_page_demo_${String(index + 1).padStart(2, '0')}`,
+    userId,
+    customerName: 'Pagination demo customer',
+    phone: '0900000000',
+    area: DEMO_AREAS[index % DEMO_AREAS.length],
+    status: DEMO_STATUSES[index % DEMO_STATUSES.length],
+    createdAt: new Date(now - index * 3 * 60 * 60 * 1000).toISOString(),
+    deliveryFee: index % 3 === 0 ? 100 : 60,
+    items: [{ dishId: 'demo-dish', name: 'Demo dish', price: 160 + ((index * 53) % 440), quantity: 1 + (index % 3) }]
+  }));
+}
+
+export const metadata = {
+  title: 'My Orders',
+  description: 'Private order history for the signed-in customer.',
+  robots: { index: false, follow: false }
+};
+
+export default async function OrdersPage({ searchParams }) {
   const session = await getSession();
   if (!session) redirect('/signin?next=/orders');
-  const orders = getOrdersFor(session.id);
-  return <section className="section container page-top"><div className="account-head"><div><span className="eyebrow dark">YOUR ACCOUNT</span><h1>Hey, {session.name.split(' ')[0]} 👋</h1><p>Your history is private and scoped to your session.</p></div><LogoutButton /></div><div className="orders-list">{orders.length ? orders.map((order)=><Link href={`/orders/${order.id}`} className="order-row" key={order.id}><div className="order-icon">🍽️</div><div><strong>#{order.id}</strong><span>{order.items.reduce((sum,item)=>sum+item.quantity,0)} items · {new Date(order.createdAt).toLocaleDateString()}</span></div><span className={`order-badge ${order.status}`}>{order.status.replaceAll('-', ' ')}</span><span className="arrow">→</span></Link>) : <div className="empty-state"><div>🧾</div><h3>No orders yet.</h3><p>Your next meal is only a few clicks away.</p><Link href="/menu" className="button button-primary">Browse menu</Link></div>}</div></section>;
+
+  const query = await searchParams;
+  const demoState = typeof query?.demo === 'string' ? query.demo : '';
+  if (demoState === 'error') throw new Error('Demonstration order history error requested by user.');
+  if (demoState === 'loading') return <OrdersLoading />;
+
+  // Customer order history must stay scoped to the authenticated account.
+  const demoMode = demoState === 'pages';
+  const orders = demoState === 'empty' ? [] : demoMode ? createPaginationDemoOrders(session.id) : getOrdersFor(session.id);
+  const firstName = String(session.name || 'there').trim().split(/\s+/)[0];
+  const exportRows = orders.map((order) => {
+    const items = Array.isArray(order.items) ? order.items : [];
+    const subtotal = items.reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 0), 0);
+    const fee = Number.isFinite(Number(order.deliveryFee)) ? Number(order.deliveryFee) : 60;
+    return [order.id, order.createdAt || '', order.status || '', order.area || '', order.deliveryAddress || '', items.map((item) => `${item.quantity}x ${item.name}`).join('; '), subtotal, fee, subtotal + fee];
+  });
+
+  return (
+    <section className="section container page-top ops-orders-page">
+      <div className="ops-orders-heading">
+        <div><span className="eyebrow dark">YOUR ACCOUNT</span><h1>My orders<span aria-hidden="true">.</span></h1><p>Hi {firstName}, your order history and delivery details are all in one place.</p></div>
+        <div className="ops-orders-heading-actions">{!demoMode && orders.length > 0 ? <ExportOrdersButton rows={exportRows} /> : null}<Link className="button button-ghost" href="/menu">Browse menu</Link><LogoutButton /></div>
+      </div>
+      <OrderTable orders={orders} searchParams={query} demoMode={demoMode} />
+    </section>
+  );
 }

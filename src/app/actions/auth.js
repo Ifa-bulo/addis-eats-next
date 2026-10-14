@@ -24,7 +24,7 @@ export async function signIn(_prevState, formData) {
   const next = safeNext(String(formData.get('next') || '/'));
   const user = getUserByEmail(email);
 
-  if (process.env.NODE_ENV === 'production' && (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32)) {
+  if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32) {
     return { error: 'Authentication is not configured yet. Set SESSION_SECRET to a random value with at least 32 characters.' };
   }
   if (!user || !verifyUserPassword(user, password)) return { error: 'Email or password is incorrect.' };
@@ -48,7 +48,7 @@ export async function signUp(_prevState, formData) {
   const password = String(formData.get('password') || '');
   const passwordConfirm = String(formData.get('passwordConfirm') || '');
 
-  if (process.env.NODE_ENV === 'production' && (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32)) {
+  if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32) {
     return { error: 'Authentication is not configured yet. Set SESSION_SECRET to a random value with at least 32 characters.' };
   }
   if (name.length < 2 || name.length > 80) return { error: 'Enter a name between 2 and 80 characters.' };

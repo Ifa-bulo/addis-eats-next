@@ -34,7 +34,7 @@ export default function RootLayout({ children }) {
       <body>
         <CartProvider>
           <Header />
-          <main id="main-content">{children}</main>
+          <main id="main-content" tabIndex={-1}>{children}</main>
           <Footer />
         </CartProvider>
       </body>

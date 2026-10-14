@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from './cart-provider';
+import { etb } from '@/lib/format';
 import FavoriteButton from './favorite-button';
 
 const categoryLabel = (value) => value.replace(/-/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
@@ -18,13 +19,13 @@ export default function DishCard({ dish }) {
           <Image src={dish.image} alt={dish.name} width={900} height={620} className="dish-image" sizes="(max-width: 640px) 90vw, (max-width: 980px) 45vw, 25vw" />
         </Link>
         <FavoriteButton dishId={dish.id} dishName={dish.name} />
-        {dish.popular && <span className="qe-popular-tag"><span aria-hidden="true">★</span> Popular</span>}
+        {!dish.isAvailable ? <span className="qe-popular-tag qe-unavailable-tag">Currently unavailable</span> : dish.popular && <span className="qe-popular-tag"><span aria-hidden="true">★</span> Popular</span>}
       </div>
       <div className="dish-body qe-dish-body">
         <div className="dish-meta"><span>{categoryLabel(dish.category)}</span><span className="qe-spice-pill">{spiceLabel(dish.spiceLevel)}</span></div>
         <Link href={`/menu/${dish.id}`} className="qe-dish-title-link"><h3>{dish.name}</h3></Link>
         <p>{dish.description}</p>
-        <div className="dish-bottom qe-dish-bottom"><strong>ETB {dish.price}</strong><button type="button" className="add-button" onClick={() => addItem(dish)} aria-label={`Add ${dish.name} to cart`}>Add <span aria-hidden="true">＋</span></button></div>
+        <div className="dish-bottom qe-dish-bottom"><strong>{etb(dish.price)}</strong><button type="button" className="add-button" onClick={() => addItem(dish)} aria-label={`Add ${dish.name} to cart`} disabled={!dish.isAvailable}>{dish.isAvailable ? <>Add <span aria-hidden="true">＋</span></> : 'Unavailable'}</button></div>
       </div>
     </article>
   );

@@ -12,7 +12,7 @@ export default function sitemap() {
     url: `${base}/blog/${post.slug}`,
     lastModified: new Date()
   }));
-  const dishRoutes = getDishes().map((dish) => ({
+  const dishRoutes = getDishes().filter((dish) => dish.isAvailable).map((dish) => ({
     url: `${base}/menu/${dish.id}`,
     lastModified: new Date()
   }));

@@ -12,6 +12,12 @@ if (!globalStore.__ADDIS_EATS_ORDERS__) {
 if (!globalStore.__ADDIS_EATS_USERS__) {
   globalStore.__ADDIS_EATS_USERS__ = users;
 }
+if (!globalStore.__ADDIS_EATS_ORDER_IDEMPOTENCY__) {
+  globalStore.__ADDIS_EATS_ORDER_IDEMPOTENCY__ = new Map();
+}
+if (!globalStore.__ADDIS_EATS_DISH_AVAILABILITY__) {
+  globalStore.__ADDIS_EATS_DISH_AVAILABILITY__ = new Map();
+}
 
 const fallbackImages = {
   'doro-wat': '/images/dishes/doro-wat.svg',
@@ -43,11 +49,24 @@ function imageForDish(dish) {
 }
 
 export function getDishes() {
-  return dishes.map((dish) => ({ ...dish, image: imageForDish(dish) }));
+  return dishes.map((dish) => ({
+    ...dish,
+    image: imageForDish(dish),
+    isAvailable: globalStore.__ADDIS_EATS_DISH_AVAILABILITY__.has(dish.id)
+      ? globalStore.__ADDIS_EATS_DISH_AVAILABILITY__.get(dish.id)
+      : dish.isAvailable !== false
+  }));
 }
 
 export function getDish(id) {
   return getDishes().find((dish) => dish.id === id) ?? null;
+}
+
+export function setDishAvailability(dishId, isAvailable) {
+  if (!dishes.some((dish) => dish.id === dishId) || typeof isAvailable !== 'boolean') return null;
+  // Demo store only: a persistent production database must save this field.
+  globalStore.__ADDIS_EATS_DISH_AVAILABILITY__.set(dishId, isAvailable);
+  return getDish(dishId);
 }
 
 export function searchDishes(query = '') {
@@ -59,8 +78,21 @@ export function searchDishes(query = '') {
   );
 }
 
+const SEEDED_DEMO_USER_IDS = new Set(['user-1', 'user-2', 'staff-1']);
+
+function demoAccountsEnabled() {
+  const configured = process.env.ENABLE_DEMO_ACCOUNTS?.trim().toLowerCase();
+  if (configured === 'true') return true;
+  if (configured === 'false') return false;
+  return process.env.NODE_ENV !== 'production';
+}
+
 export function getUserByEmail(email) {
-  return globalStore.__ADDIS_EATS_USERS__.find((user) => user.email.toLowerCase() === email.trim().toLowerCase()) ?? null;
+  const user = globalStore.__ADDIS_EATS_USERS__.find((entry) => entry.email.toLowerCase() === email.trim().toLowerCase()) ?? null;
+  // Known seeded credentials are for local/preview demonstrations only. They
+  // must not grant staff access on the public production deployment by default.
+  if (user && SEEDED_DEMO_USER_IDS.has(user.id) && !demoAccountsEnabled()) return null;
+  return user;
 }
 
 export function getUserById(id) {
@@ -93,21 +125,43 @@ export function getAllOrders() {
   );
 }
 
-export function createOrder({ userId, customerName, phone, area, items, deliveryOption = 'standard', deliveryFee = 60 }) {
+export function createOrder({ userId, customerName, phone, area, deliveryAddress = '', items, deliveryOption = 'standard', deliveryFee = 60, idempotencyKey = '' }) {
+  // Process-local idempotency guard for the demo runtime. Production must use a
+  // unique database constraint on (userId, idempotencyKey) to cover instances.
+  const key = typeof idempotencyKey === 'string' ? idempotencyKey.trim() : '';
+  const dedupeKey = key ? `${userId}:${key}` : '';
+  const seenOrderId = dedupeKey ? globalStore.__ADDIS_EATS_ORDER_IDEMPOTENCY__.get(dedupeKey) : null;
+  if (seenOrderId) {
+    const existingOrder = globalStore.__ADDIS_EATS_ORDERS__.find((entry) => entry.id === seenOrderId);
+    if (existingOrder) return existingOrder;
+    globalStore.__ADDIS_EATS_ORDER_IDEMPOTENCY__.delete(dedupeKey);
+  }
+  const now = new Date().toISOString();
   const order = {
     id: `ord_${crypto.randomUUID().slice(0, 8)}`,
     userId,
     customerName,
     phone,
     area,
+    deliveryAddress: String(deliveryAddress || '').trim(),
     deliveryOption,
     deliveryFee,
     status: 'received',
-    createdAt: new Date().toISOString(),
+    createdAt: now,
+    updatedAt: now,
     items
   };
 
   globalStore.__ADDIS_EATS_ORDERS__.unshift(order);
+  if (dedupeKey) {
+    globalStore.__ADDIS_EATS_ORDER_IDEMPOTENCY__.set(dedupeKey, order.id);
+    // Bound the in-memory map for long-running local demos.
+    while (globalStore.__ADDIS_EATS_ORDER_IDEMPOTENCY__.size > 1000) {
+      const oldestKey = globalStore.__ADDIS_EATS_ORDER_IDEMPOTENCY__.keys().next().value;
+      if (!oldestKey) break;
+      globalStore.__ADDIS_EATS_ORDER_IDEMPOTENCY__.delete(oldestKey);
+    }
+  }
   return order;
 }
 
@@ -115,5 +169,6 @@ export function updateOrderStatus(orderId, status) {
   const order = globalStore.__ADDIS_EATS_ORDERS__.find((entry) => entry.id === orderId);
   if (!order) return null;
   order.status = status;
+  order.updatedAt = new Date().toISOString();
   return order;
 }

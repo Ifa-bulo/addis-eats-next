@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { etb } from '@/lib/format';
 import { useEffect, useState } from 'react';
 import { useCart } from './cart-provider';
 
@@ -55,8 +56,8 @@ export default function FavoritesView({ dishes }) {
           <Link href={`/menu/${dish.id}`} className="qe-favorite-thumb">
             <Image src={dish.image} alt={dish.name} width={120} height={100} />
           </Link>
-          <div className="qe-favorite-row-copy"><Link href={`/menu/${dish.id}`}><strong>{dish.name}</strong></Link><span>ETB {dish.price}</span></div>
-          <button type="button" className="qe-button qe-button-small" onClick={() => addItem(dish)}>Add to cart <span aria-hidden="true">＋</span></button>
+          <div className="qe-favorite-row-copy"><Link href={`/menu/${dish.id}`}><strong>{dish.name}</strong></Link><span>{etb(dish.price)}</span></div>
+          <button type="button" className="qe-button qe-button-small" onClick={() => addItem(dish)} disabled={!dish.isAvailable}>{dish.isAvailable ? <>Add to cart <span aria-hidden="true">＋</span></> : 'Unavailable'}</button>
         </article>
       ))}
     </div>
